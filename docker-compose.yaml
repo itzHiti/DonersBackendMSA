@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # PostgreSQL for Order Service
+  order-db:
+    image: postgres:15-alpine
+    container_name: order-db
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: orderuser
+      POSTGRES_PASSWORD: orderpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+    networks:
+      - doner-network
+
+  # PostgreSQL for Delivery Service
+  delivery-db:
+    image: postgres:15-alpine
+    container_name: delivery-db
+    environment:
+      POSTGRES_DB: delivery_db
+      POSTGRES_USER: deliveryuser
+      POSTGRES_PASSWORD: deliverypass
+    ports:
+      - "5433:5432"
+    volumes:
+      - delivery-db-data:/var/lib/postgresql/data
+    networks:
+      - doner-network
+
+  # Zookeeper for Kafka
+#  zookeeper:
+#    image: confluentinc/cp-zookeeper:7.5.0
+#    container_name: zookeeper
+#    environment:
+#      ZOOKEEPER_CLIENT_PORT: 2181
+#      ZOOKEEPER_TICK_TIME: 2000
+#    ports:
+#      - "2181:2181"
+#    networks:
+#      - doner-network
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - doner-network
+
+  # Keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME_STRICT: 'false'
+      KC_HTTP_ENABLED: 'true'
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak-db
+    networks:
+      - doner-network
+
+  # PostgreSQL for Keycloak
+  keycloak-db:
+    image: postgres:15-alpine
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    networks:
+      - doner-network
+
+volumes:
+  order-db-data:
+  delivery-db-data:
+  keycloak-db-data:
+
+networks:
+  doner-network:
+    driver: bridge
+
