@@ -1,4 +1,5 @@
 rootProject.name = 'DonersBackendMSA'
 
 include 'delivery-service'
+include 'order-service'
 
