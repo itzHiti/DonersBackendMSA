@@ -29,6 +29,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final OrderEventProducer eventProducer;
+    private final UserBalanceService userBalanceService;
 
     @Transactional
     public OrderDTO createOrder(CreateOrderRequest request, String customerId) {
@@ -123,6 +124,16 @@ public class OrderService {
         OrderStatus oldStatus = order.getStatus();
         order.setStatus(newStatus);
         Order updatedOrder = orderRepository.save(order);
+
+        // Earn coins if status changed to DELIVERED
+        if (newStatus == OrderStatus.DELIVERED && oldStatus != OrderStatus.DELIVERED) {
+            userBalanceService.earnCoinsFromOrder(
+                    updatedOrder.getCustomerId(),
+                    updatedOrder.getId(),
+                    updatedOrder.getTotalPrice()
+            );
+            log.info("Coins earned for customer {} from order {}", updatedOrder.getCustomerId(), updatedOrder.getId());
+        }
 
         // Publish status change event
         OrderStatusChangedEvent event = OrderStatusChangedEvent.builder()

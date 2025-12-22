@@ -74,7 +74,12 @@ services:
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: keycloak
       KC_HOSTNAME_STRICT: 'false'
+      KC_HOSTNAME_STRICT_HTTPS: 'false'
+      KC_HTTPS_PROTOCOLS: 'TLSv1.3,TLSv1.2'
       KC_HTTP_ENABLED: 'true'
+      KC_HTTP_RELATIVE_PATH: /
+      KC_PROXY: 'edge'
+      KC_PROXY_HEADERS: 'xforwarded'
     ports:
       - "8080:8080"
     depends_on:
@@ -111,6 +116,7 @@ services:
     depends_on:
       - order-db
       - kafka
+      - keycloak
     networks:
       - doner-network
 
@@ -129,8 +135,10 @@ services:
     depends_on:
       - delivery-db
       - kafka
+      - keycloak
     networks:
       - doner-network
+
 
 volumes:
   order-db-data:
