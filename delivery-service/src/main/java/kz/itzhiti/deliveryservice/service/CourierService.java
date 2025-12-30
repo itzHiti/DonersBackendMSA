@@ -75,6 +75,16 @@ public class CourierService {
         return convertToDTO(updatedCourier);
     }
 
+    @Transactional
+    public void deleteCourier(Long id) {
+        log.info("Deleting courier with ID: {}", id);
+        if (!courierRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Courier not found with ID: " + id);
+        }
+        courierRepository.deleteById(id);
+        log.info("Courier deleted with ID: {}", id);
+    }
+
     private CourierDTO convertToDTO(Courier courier) {
         return CourierDTO.builder()
                 .id(courier.getId())

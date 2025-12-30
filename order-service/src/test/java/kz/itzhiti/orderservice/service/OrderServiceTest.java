@@ -37,7 +37,7 @@ class OrderServiceTest {
 
         OrderDTO result = orderService.getOrderById(
                 1L,
-                "cust123",   // ustomerIdc
+                "cust123",   // customerId
                 false        // не админ
         );
 
@@ -45,7 +45,7 @@ class OrderServiceTest {
         verify(orderRepository).findById(1L);
     }
 
-    // админ смотреть любой закакз
+    // админ может смотреть любой заказ
     @Test
     void getOrderById_admin_shouldReturnOrderDTO() {
         Order order = new Order();
@@ -64,7 +64,7 @@ class OrderServiceTest {
         assertNotNull(result);
     }
 
-    // ни то нидругое
+    // ни то ни другое
     @Test
     void getOrderById_notOwner_shouldThrowUnauthorized() {
         Order order = new Order();

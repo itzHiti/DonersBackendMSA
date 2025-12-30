@@ -123,6 +123,34 @@ public class DeliveryService {
         return convertToDTO(updatedDelivery);
     }
 
+    @Transactional
+    public void cancelDelivery(Long id) {
+        log.info("Cancelling delivery: {}", id);
+        Delivery delivery = deliveryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery not found with ID: " + id));
+
+        delivery.setStatus(DeliveryStatus.CANCELLED);
+        deliveryRepository.save(delivery);
+
+        log.info("Delivery cancelled: {}", id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeliveryDTO> getDeliveriesByStatus(DeliveryStatus status) {
+        log.debug("Fetching deliveries by status: {}", status);
+        return deliveryRepository.findByStatus(status).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeliveryDTO> getDeliveriesByCourier(Long courierId) {
+        log.debug("Fetching deliveries by courier ID: {}", courierId);
+        return deliveryRepository.findByCourierId(courierId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     private DeliveryDTO convertToDTO(Delivery delivery) {
         CourierDTO courierDTO = null;
         if (delivery.getCourier() != null) {
@@ -148,4 +176,3 @@ public class DeliveryService {
                 .build();
     }
 }
-

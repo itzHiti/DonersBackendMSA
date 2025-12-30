@@ -33,7 +33,7 @@ public class Delivery {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String address;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = true, length = 20)
     private String phone;
 
     @Column(nullable = false, length = 50)
@@ -65,4 +65,3 @@ public class Delivery {
         updatedAt = LocalDateTime.now();
     }
 }
-

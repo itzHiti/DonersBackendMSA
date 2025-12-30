@@ -18,7 +18,14 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "spring.flyway.enabled=false",
+        "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.hibernate.ddl-auto=none"
+}, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @EmbeddedKafka(
         partitions = 1,
         topics = "order-events"
@@ -28,7 +35,7 @@ class OrderKafkaTest {
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Autowired
+    @Autowired(required = false)
     private EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Test
