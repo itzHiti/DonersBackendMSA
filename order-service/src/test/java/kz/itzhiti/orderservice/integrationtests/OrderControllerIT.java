@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kz.itzhiti.orderservice.dto.CreateOrderRequest;
 import kz.itzhiti.orderservice.dto.OrderItemRequest;
 import kz.itzhiti.orderservice.model.Product;
+import kz.itzhiti.orderservice.model.enums.ProductCategory;
 import kz.itzhiti.orderservice.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,12 +39,16 @@ class OrderControllerIT {
     @Autowired
     ProductRepository productRepository;
 
+    @MockBean
+    private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+
     @Test
     void shouldCreateOrderSuccessfully() throws Exception {
 
         Product product = Product.builder()
                 .name("Doner")
                 .price(BigDecimal.valueOf(1500))
+                .category(ProductCategory.DONER)
                 .available(true)
                 .build();
         product = productRepository.save(product);
